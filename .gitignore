@@ -8,3 +8,5 @@ build/
 .idea/
 
 *.json
+*.exe
+*.ps1
