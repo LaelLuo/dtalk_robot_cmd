@@ -36,6 +36,17 @@ class SendCommand extends BaseCommand {
   }
 
   @override
+  String get usage {
+    final buffer = StringBuffer()
+      ..writeln(invocation)
+      ..writeln()
+      ..writeln(argParser.usage)
+      ..writeln()
+      ..write(_sendHelpMessage.trimRight());
+    return buffer.toString();
+  }
+
+  @override
   Future<void> run() async {
     await super.run();
     final results = argResults!;
@@ -278,3 +289,24 @@ class SendCommand extends BaseCommand {
     );
   }
 }
+
+const String _sendHelpMessage = '''
+常用示例:
+  dtalk send "纯文本内容"
+  dtalk send --type markdown --title "部署状态" --text "### 成功\\n> 已完成"
+  dtalk send --type link --title "查看详情" --text "点击跳转" \\
+             --message-url "https://example.com"
+  dtalk send --type actionCard --title "审批提醒" --text "请尽快处理" \\
+             --single --single-title "打开" --single-url "https://example.com"
+
+字段说明:
+  --content  用于 text/markdown 消息的正文，若未提供将读取命令剩余文本。
+  --text     用于 markdown/link/actionCard 的展示文本；link/actionCard 必填。
+
+@ 说明:
+  --at-mobile 可多次传入或逗号分隔手机号；--at-user 传入 userId；--at-all @所有人。
+  仅 text/markdown/actionCard 支持 @，link/feedCard 会直接报错。
+
+提示:
+  若不使用结构化参数，可直接输入纯文本或 JSON 字符串，内部会自动判定消息类型。
+''';
