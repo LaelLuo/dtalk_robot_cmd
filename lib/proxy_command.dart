@@ -48,8 +48,7 @@ class ProxyCommand extends Command {
     } else if (path != null) {
       addDTalk(path, token, secret);
     } else {
-      print('缺少path参数');
-      return;
+      throw UsageException('缺少 path 参数', _proxyHelpMessage);
     }
 
     await startServer(port, dTalkMap);
@@ -107,3 +106,23 @@ class ProxyCommand extends Command {
     }
   }
 }
+
+const String _proxyHelpMessage = '''
+使用说明:
+  dtalk proxy --path /hook --token <token> --secret <secret> [--port 8080]
+  dtalk proxy --config hooks.json [--port 8080]
+
+配置示例:
+  hooks.json:
+  [
+    {"path": "/dev", "token": "xxx", "secret": "yyy"},
+    {"path": "/prod", "token": "aaa", "secret": "bbb"}
+  ]
+
+请求格式:
+  POST /<path>    请求体为 JSON，结构同钉钉 webhook 消息。
+  GET  /<path>?message=<文本>  将文本直接发送为 text 消息。
+
+消息类型:
+  支持 text、markdown、link、actionCard、feedCard，并在运行时校验 @ 参数。
+''';
