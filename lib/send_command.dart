@@ -121,9 +121,12 @@ class SendCommand extends BaseCommand {
       case 'markdown':
         final title = _requireOption(
             results, 'title', 'markdown 类型需要 --title 指定标题', usage);
-        final body = _stringOption(results, 'text') ?? textFallback;
+        final body = _stringOption(results, 'text') ??
+            _stringOption(results, 'content') ??
+            textFallback;
         if (body == null || body.trim().isEmpty) {
-          throw UsageException('markdown 类型需要 --text 指定正文或提供剩余文本参数', usage);
+          throw UsageException(
+              'markdown 类型需要 --text/--content 指定正文或提供剩余文本参数', usage);
         }
         return DTalkMarkdownMessage(title: title, text: body, at: at);
       case 'link':
@@ -300,7 +303,7 @@ const String _sendHelpMessage = '''
              --single --single-title "打开" --single-url "https://example.com"
 
 字段说明:
-  --content  用于 text/markdown 消息的正文，若未提供将读取命令剩余文本。
+  --content  用于 text/markdown 消息正文；markdown 中等同 --text，默认读取命令剩余文本。
   --text     用于 markdown/link/actionCard 的展示文本；link/actionCard 必填。
 
 @ 说明:
