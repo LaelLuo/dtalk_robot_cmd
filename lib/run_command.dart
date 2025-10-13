@@ -14,10 +14,11 @@ class RunCommand extends BaseCommand {
     }
     final commandString = rest.first;
     final command = commandString.split(RegExp(r' +'));
-    final processResult = await Process.run(command.removeAt(0), command, runInShell: true);
+    final processResult =
+        await Process.run(command.removeAt(0), command, runInShell: true);
     final builder = StringBuffer('执行命令: $commandString\n');
     builder.write('stdout: ${processResult.stdout}\n');
     builder.write('stderr: ${processResult.stderr}\n');
-    await dTalk.sendMessage(builder.toString());
+    await dTalk.sendText(builder.toString());
   }
 }

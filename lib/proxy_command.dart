@@ -8,7 +8,8 @@ import 'package:dtalk_robot/dtalk_robot.dart';
 class ProxyCommand extends Command {
   ProxyCommand() : super() {
     argParser.addOption('path', abbr: 'p', help: 'proxy path');
-    argParser.addOption('port', abbr: 'o', help: 'proxy port', defaultsTo: '8080');
+    argParser.addOption('port',
+        abbr: 'o', help: 'proxy port', defaultsTo: '8080');
     argParser.addOption('config', abbr: 'c', help: 'config file');
   }
 
@@ -81,12 +82,28 @@ class ProxyCommand extends Command {
           message = null;
           break;
       }
-      if (message == null) {
-        request.response.statusCode = 404;
-      } else {
-        await dTalk.sendMessage(message);
+      if (message == null || message.trim().isEmpty) {
+        request.response.statusCode = 400;
+        request.response.write('message is empty');
+        await request.response.close();
+        continue;
       }
-      request.response.close();
+      try {
+        await dTalk.sendMessage(parseDTalkMessage(message));
+        request.response.statusCode = 200;
+        request.response.write('ok');
+      } on FormatException catch (error) {
+        request.response.statusCode = 400;
+        final errorMessage = 'message parse error: ${error.message}';
+        request.response.write(errorMessage);
+        print(errorMessage);
+      } catch (error) {
+        request.response.statusCode = 500;
+        final errorMessage = 'send message failed: $error';
+        request.response.write(errorMessage);
+        print(errorMessage);
+      }
+      await request.response.close();
     }
   }
 }

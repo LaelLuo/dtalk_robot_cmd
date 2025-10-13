@@ -13,4 +13,4 @@ dependencies:
     git: https://github.com/LaelLuo/dtalk_robot.git
 
 dev_dependencies:
-  lints: ^1.0.0
+  lints: ^5.1.1
