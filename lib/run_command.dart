@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dtalk/base_command.dart';
+import 'package:dtalk_robot/dtalk_robot.dart';
 
 class RunCommand extends BaseCommand {
   RunCommand() : super('run', '执行命令');
@@ -16,9 +17,26 @@ class RunCommand extends BaseCommand {
     final command = commandString.split(RegExp(r' +'));
     final processResult =
         await Process.run(command.removeAt(0), command, runInShell: true);
-    final builder = StringBuffer('执行命令: $commandString\n');
-    builder.write('stdout: ${processResult.stdout}\n');
-    builder.write('stderr: ${processResult.stderr}\n');
-    await dTalk.sendText(builder.toString());
+    final stdout = processResult.stdout?.toString() ?? '';
+    final stderr = processResult.stderr?.toString() ?? '';
+
+    String formatSection(String title, String content) {
+      final trimmed = content.trimRight();
+      if (trimmed.isEmpty) return '';
+      return '#### $title\n```bash\n$trimmed\n```\n';
+    }
+
+    final markdown = StringBuffer()
+      ..writeln('### 命令执行')
+      ..writeln('`$commandString`\n')
+      ..write(formatSection('stdout', stdout))
+      ..write(formatSection('stderr', stderr));
+
+    await dTalk.sendMessage(
+      DTalkMarkdownMessage(
+        title: '命令执行结果',
+        text: markdown.toString().trim(),
+      ),
+    );
   }
 }
