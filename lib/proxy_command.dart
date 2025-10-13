@@ -20,6 +20,17 @@ class ProxyCommand extends Command {
   String name = 'proxy';
 
   @override
+  String get usage {
+    final buffer = StringBuffer()
+      ..writeln(invocation)
+      ..writeln()
+      ..writeln(argParser.usage)
+      ..writeln()
+      ..write(_proxyHelpMessage.trimRight());
+    return buffer.toString();
+  }
+
+  @override
   Future<void> run() async {
     final token = globalResults.getStringOrNull('token');
     final secret = globalResults.getStringOrNull('secret');
