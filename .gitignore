@@ -10,3 +10,5 @@ build/
 *.json
 *.exe
 *.ps1
+
+bin/dtalk
