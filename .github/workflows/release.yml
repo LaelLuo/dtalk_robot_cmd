@@ -32,19 +32,19 @@ jobs:
           dart compile exe bin/dtalk.dart \
             -o dist/dtalk-linux-x64 \
             --target-os=linux \
-            --target-architecture=x64
+            --target-arch=x64
 
           # Windows x64
           dart compile exe bin/dtalk.dart \
             -o dist/dtalk-windows-x64.exe \
             --target-os=windows \
-            --target-architecture=x64
+            --target-arch=x64
 
           # Android ARM64
           dart compile exe bin/dtalk.dart \
             -o dist/dtalk-android-arm64 \
             --target-os=android \
-            --target-architecture=arm64
+            --target-arch=arm64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
