@@ -7,8 +7,8 @@ on:
 
 jobs:
   build:
-    name: Build all binaries (cross-compile)
-    runs-on: ubuntu-latest
+    name: Build all binaries on Windows (cross-compile)
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
@@ -17,59 +17,39 @@ jobs:
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
-          # Needs a Dart 3.x SDK that支持 cross compile.
+          # Use a Dart version that supports cross-compilation on Windows.
           sdk: 'stable'
 
       - name: Install dependencies
         run: dart pub get
 
-      - name: Build binaries (linux-x64 / windows-x64 / android-arm64)
+      - name: Build binaries (windows-x64 / linux-x64 / android-arm64)
         run: |
-          set -e
-          mkdir -p dist
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
 
-          # Linux x64
-          dart compile exe bin/dtalk.dart \
-            -o dist/dtalk-linux-x64 \
-            --target-os=linux \
+          # Windows x64 native
+          dart compile exe bin/dtalk.dart `
+            -o dist/dtalk-windows-x64.exe
+
+          # Linux x64 (cross-compile)
+          dart compile exe bin/dtalk.dart `
+            -o dist/dtalk-linux-x64 `
+            --target-os=linux `
             --target-arch=x64
 
-          # Windows x64
-          dart compile exe bin/dtalk.dart \
-            -o dist/dtalk-windows-x64.exe \
-            --target-os=windows \
-            --target-arch=x64
-
-          # Android ARM64
-          dart compile exe bin/dtalk.dart \
-            -o dist/dtalk-android-arm64 \
-            --target-os=android \
+          # Android ARM64 (cross-compile)
+          dart compile exe bin/dtalk.dart `
+            -o dist/dtalk-android-arm64 `
+            --target-os=android `
             --target-arch=arm64
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist
-
-  release:
-    name: Create GitHub Release
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            dist/dtalk-linux-x64
             dist/dtalk-windows-x64.exe
+            dist/dtalk-linux-x64
             dist/dtalk-android-arm64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
