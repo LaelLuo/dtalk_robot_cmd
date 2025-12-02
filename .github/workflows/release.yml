@@ -38,10 +38,10 @@ jobs:
             --target-os=linux `
             --target-arch=x64
 
-          # Android ARM64 (cross-compile)
+          # "Android" ARM64: actually linux-arm64 binary for Termux/other Linux-on-Android envs
           dart compile exe bin/dtalk.dart `
             -o dist/dtalk-android-arm64 `
-            --target-os=android `
+            --target-os=linux `
             --target-arch=arm64
 
       - name: Create GitHub Release
