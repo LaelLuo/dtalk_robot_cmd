@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'release*'
+
+jobs:
+  build:
+    name: Build all binaries (cross-compile)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          # Needs a Dart 3.x SDK that支持 cross compile.
+          sdk: 'stable'
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Build binaries (linux-x64 / windows-x64 / android-arm64)
+        run: |
+          set -e
+          mkdir -p dist
+
+          # Linux x64
+          dart compile exe bin/dtalk.dart \
+            -o dist/dtalk-linux-x64 \
+            --target-os=linux \
+            --target-architecture=x64
+
+          # Windows x64
+          dart compile exe bin/dtalk.dart \
+            -o dist/dtalk-windows-x64.exe \
+            --target-os=windows \
+            --target-architecture=x64
+
+          # Android ARM64
+          dart compile exe bin/dtalk.dart \
+            -o dist/dtalk-android-arm64 \
+            --target-os=android \
+            --target-architecture=arm64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/dtalk-linux-x64
+            dist/dtalk-windows-x64.exe
+            dist/dtalk-android-arm64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
